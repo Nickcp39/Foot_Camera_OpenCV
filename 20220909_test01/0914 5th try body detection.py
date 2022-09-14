@@ -54,7 +54,9 @@ def binaryMask(frame, x0, y0, width, height):
     # 高斯滤波处理
     gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
     # 高斯模糊 斯模糊本质上是低通滤波器，输出图像的每个像素点是原图像上对应像素点与周围像素点的加权和
-    # 高斯矩阵的尺寸越大，标准差越大，处理过的图像模糊程度越大
+    # 高斯矩阵的尺寸越大，标准差越大，处理过的图像模糊程度越大 factor =5 测试了2 3 5 10 ， 其中2 10 都超出边界， 3 颗粒感变多，变细
+    # dst = cv2.GaussianBlur(src, ksize, sigmaX, dst=None, sigmaY=None, borderType=None)
+    # dev =  2 ， 测试了 0.1， 0.5 ， 5 ， 10， 主要表现是 边缘线段的连续性 随数字下降而下降。
     blur = cv2.GaussianBlur(gray, (5, 5), 2)  # 高斯模糊，给出高斯模糊矩阵和标准差
 
     # 当同一幅图像上的不同部分的具有不同亮度时。这种情况下我们需要采用自适应阈值
@@ -66,16 +68,27 @@ def binaryMask(frame, x0, y0, width, height):
     ret, res = cv2.threshold(th3, 70, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)  # ret还是bool类型
 
     "这里可以插入代码调用网络"
-    # 二值化处理
+    # 二值化处理 3,3
     kernel = np.ones((3, 3), np.uint8)  # 设置卷积核
+    # cv2.erode(src, kernel[, dst[, anchor[, iterations[, borderType[, borderValue]]]]]) ->dst
+    #
     erosion = cv2.erode(res, kernel)  # 腐蚀操作 开运算：先腐蚀后膨胀，去除孤立的小点，毛刺
     cv2.imshow("erosion", erosion)
 
+    # 多退少补 function， 先删除毛刺， 然后补充线段， 数字越大， 补充的越sharp
+    #kernel = np.ones((4, 4), np.uint8)
     dilation = cv2.dilate(erosion, kernel)  # 膨胀操作 闭运算：先膨胀后腐蚀，填平小孔，弥合小裂缝
     cv2.imshow("dilation", dilation)
+
     # 轮廓提取
+    # edge = cv2.Canny(image, threshold1, threshold2[, edges[, apertureSize[, L2gradient ]]])
+    #
     binaryimg = cv2.Canny(res, 50, 200)  # 二值化，canny检测
+
+    # cv2.findContours(image, mode, method[, contours[, hierarchy[, offset ]]])
+    #
     h = cv2.findContours(binaryimg, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)  # 寻找轮廓
+
     contours = h[0]  # 提取轮廓
     ret = np.ones(res.shape, np.uint8)  # 创建黑色幕布
     cv2.drawContours(ret, contours, -1, (255, 255, 255), 1)  # 绘制白色轮廓
