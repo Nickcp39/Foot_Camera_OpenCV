@@ -1,4 +1,4 @@
-# Foot_Camera_OpenCV
+# 2D free hand system 
 
 
 ### 版本历史 
