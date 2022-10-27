@@ -21,7 +21,7 @@ def open_camera():
     #print(frame.shape)
     if not cameraCapture_first.isOpened():
         print("I can't open it")
-        return -1;
+        return -1;1
     """
     # 视频写入代码
     fourcc = cv2.VideoWriter_fourcc(*'XVID')

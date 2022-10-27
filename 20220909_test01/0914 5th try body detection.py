@@ -4,6 +4,7 @@ import numpy as np
 
 
 # 所以global 在python中都 必须这么
+
 font = cv2.FONT_HERSHEY_SIMPLEX  # 正常大小无衬线字体
 size = 0.5
 fx = 10
@@ -25,6 +26,7 @@ path = ''
 binaryMode = False  # 是否将ROI显示为而至二值模式
 saveImg = False  # 是否需要保存图片
 camera_status = False;  # 摄像头初始状态为关闭
+
 
 
 # 保存ROI图像
@@ -103,8 +105,28 @@ def binaryMask(frame, x0, y0, width, height):
 
 def camera_control(openornot):
 
+    # start control
+    cap = cv2.VideoCapture(0)  # 0为（笔记本）内置摄像头
+    camera_status = cap.isOpened()  # 检测摄像头是否开启
+    camera_control(camera_status);
+
     global  x0,y0,width,height,numofsamples,gesturename,path;
     global   binaryMode, saveImg, camera_status;
+
+
+    # if the keyboard input == Q, then start the event.
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+
+    # 设定一个视频保存 的 文件
+    out = cv2.VideoWriter('output.avi', -1, 20.0, (640,480))
+
+    """
+     filename是视频文件的完整路径
+    "XX//xx//xxx.avi", CV_FOURCC('P', 'I', 'M', '1')
+    是视频的编码方式，30.0
+    是视频的帧率，Size(640, 480)
+    是每一帧图像的大小
+    """
 
     while (openornot == True):
 
@@ -169,9 +191,9 @@ def camera_control(openornot):
     cap.release()
     cv2.destroyAllWindows()
 
+
+
 if __name__ == '__main__':
     # 创建一个视频捕捉对象
 
-    cap = cv2.VideoCapture(0)  # 0为（笔记本）内置摄像头
-    camera_status = cap.isOpened() #检测摄像头是否开启
-    camera_control(camera_status);
+    camera_control()
