@@ -11,6 +11,10 @@ import cv2 as cv
 from PIL import Image
 from pytesseract import pytesseract
 from matplotlib import pyplot as plt
+import argparse
+
+
+
 
 def thermo_image_to_temp(image):
 
@@ -27,29 +31,40 @@ def thermo_image_to_temp(image):
 
 
     #thresh = cv2.threshold(thresh4, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 5))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     #去掉了一些边角位的杂音
     thresh = cv2.morphologyEx(thresh4, cv2.MORPH_OPEN, kernel)
 
     #cv2.imshow("thresh4", thresh4)
     #cv2.imshow("gray", gray)
-    #cv2.imshow("edged", edged)
+    cv2.imshow("edged", edged)
     #cv2.imshow("thresh", thresh)
 
     gray_image  = cv2.cvtColor(thresh, cv2.COLOR_BGR2GRAY)
 
-
-    ret, binary = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY)
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, anchor=(2, 0), iterations=5)
-    contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(gray_image, contours, -1, (0, 0, 255), 3)
-
-
-    cv2.imshow("gray_image", gray_image)
-    cv2.waitKey(0)
-
+    #res = cv2.matchTemplate(Edges, templateEdges, cv2.TM_CCORR)
     path_to_image = gray_image
-    pytesseract.tesseract_cmd =
+    path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    pytesseract.tesseract_cmd = path_to_tesseract
+
+    final_image = thresh
+
+
+    options = "outputbase digits"
+    text = pytesseract.image_to_string(np.array(final_image) )
+    print(text)
+    cv2.imshow("gray_image", final_image)
+
+    (thresh, im_bw) = cv2.threshold(gray_image, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    cv2.imshow("im_bw", im_bw)
+
+
+
+    # Filename
+    filename = 'images/gray_image.png'
+    #cv2.imwrite(filename, final_image)
+
+    cv2.waitKey(0)
 
 """
     ret,thresh1 = cv.threshold(img,127,255,cv.THRESH_BINARY)
@@ -73,7 +88,7 @@ def thermo_image_to_temp(image):
 
 if __name__ == "__main__":
 
-    image = cv2.imread('109725.png')
+    image = cv2.imread('images/109725.png')
 
     thermo_image_to_temp(image)
 
