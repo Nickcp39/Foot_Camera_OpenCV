@@ -1,0 +1,2 @@
+openExample('textdetection/DetectTextsInImagesByUsingCRAFTModelExample')
+
